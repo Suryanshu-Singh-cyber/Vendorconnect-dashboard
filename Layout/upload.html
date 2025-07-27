@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Product</title>
+</head>
+<body>
+  <h2>Upload Product</h2>
+  <form id="productForm">
+    <input type="text" id="name" placeholder="Product Name" required><br><br>
+    <input type="number" id="price" placeholder="Price" required><br><br>
+    <input type="text" id="supplier" placeholder="Supplier Name" required><br><br>
+    <button type="submit">Upload</button>
+  </form>
+
+  <p id="status"></p>
+  <button onclick="logout()">Logout</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzRAYtOvQg_7Za2d2FfqkFYpXKoGTyVWY",
+      authDomain: "streetvendorapp-376bb.firebaseapp.com",
+      databaseURL: "https://streetvendorapp-376bb-default-rtdb.firebaseio.com",
+      projectId: "streetvendorapp-376bb",
+      storageBucket: "streetvendorapp-376bb.appspot.com",
+      messagingSenderId: "347902837976",
+      appId: "1:347902837976:web:db66401b3471e276ccc3ad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Check authentication and role
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("Please login first.");
+        window.location.href = "login.html";
+      } else {
+        const roleSnap = await get(ref(db, "users/" + user.uid + "/role"));
+        const role = roleSnap.exists() ? roleSnap.val() : null;
+        if (role !== "supplier" && role !== "admin") {
+          alert("Access denied. Only suppliers or admins allowed.");
+          window.location.href = "index.html";
+        }
+      }
+    });
+
+    // Upload product handler
+    document.getElementById("productForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const price = parseFloat(document.getElementById("price").value);
+      const supplier = document.getElementById("supplier").value.trim();
+
+      if (!name || isNaN(price) || !supplier) {
+        document.getElementById("status").innerText = "❌ Please fill all fields correctly.";
+        return;
+      }
+
+      push(ref(db, "products"), { name, price, supplier })
+        .then(() => {
+          document.getElementById("status").innerText = "✅ Product uploaded successfully!";
+          document.getElementById("productForm").reset();
+        })
+        .catch(err => {
+          document.getElementById("status").innerText = "❌ Upload failed!";
+          console.error(err);
+        });
+    });
+
+    // Logout function
+    window.logout = function () {
+      signOut(auth).then(() => {
+        alert("Logged out!");
+        window.location.href = "login.html";
+      });
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login/Register</title>
+  <script type="module" src="auth.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #fdf4e3; text-align: center; padding: 20px; }
+    .auth-box { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+    input, button { margin: 10px; padding: 10px; width: 80%; }
+  </style>
+</head>
+<body>
+  <h2>Street Vendor Portal</h2>
+  <div class="auth-box">
+    <h3>Register</h3>
+    <input type="email" id="registerEmail" placeholder="Email">
+    <input type="password" id="registerPassword" placeholder="Password">
+    <button onclick="register()">Register</button>
+
+    <h3>Login</h3>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="login()">Login</button>
+
+    <p id="message"></p>
+  </div>
+</body>
+</html>

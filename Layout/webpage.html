@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Street Vendor Supply Connect</title> 
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff9f0;
+      overflow-x: hidden;
+    }
+
+    nav {
+      background-color: #ff6f61;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    nav .logo {
+      color: white;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+    }
+
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    header {
+      background-color: #ff6f61;
+      color: white;
+      text-align: center;
+      padding: 40px 10px;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1rem;
+      margin-bottom: 15px;
+    }
+
+    .cta-button {
+      background-color: #fff;
+      color: #ff6f61;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .cta-button:hover {
+      background-color: #ffe5e0;
+    }
+
+    .slider {
+      position: relative;
+      width: 100%;
+      height: 320px;
+      overflow: hidden;
+    }
+
+    .slides {
+      display: flex;
+      width: 100%;
+      animation: slide 12s infinite;
+    }
+
+    .slide {
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      display: block;
+    }
+
+    @keyframes slide {
+      0% { transform: translateX(0%); }
+      33% { transform: translateX(0%); }
+      36% { transform: translateX(-100%); }
+      66% { transform: translateX(-100%); }
+      69% { transform: translateX(-200%); }
+      99% { transform: translateX(-200%); }
+      100% { transform: translateX(0%); }
+    }
+
+    section.features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      padding: 40px 20px;
+      text-align: center;
+      background-color: #fff3e0;
+    }
+
+    .feature {
+      padding: 20px;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .feature img {
+      width: 50px;
+      height: 50px;
+      margin-bottom: 10px;
+    }
+
+    section.contact {
+      padding: 40px 20px;
+      background-color: #fff9f5;
+      text-align: center;
+    }
+
+    .contact h2 {
+      color: #ff6f61;
+      margin-bottom: 10px;
+    }
+
+    footer {
+      background: #ff6f61;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.3rem;
+      }
+      .slide img {
+        height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">VendorConnect</div>
+    <ul id="navLinks">
+      <li><a href="#">Home</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#vendor">Vendor</a></li>
+      <li><a href="#supplier">Supplier</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <h1>Connecting Street Food Vendors with Reliable Suppliers</h1>
+    <p>Affordable | Trusted | Nearby</p>
+    <a href="login.html" class="cta-button">Join Now</a>
+  </header>
+
+  <div class="slider">
+    <div class="slides">
+      <div class="slide"><img src="vendor3.jpg" alt="Vendor 1"></div>
+      <div class="slide"><img src="vendor4.jpg" alt="Vendor 2"></div>
+      <div class="slide"><img src="vendor1.webp" alt="Vendor 3"></div>
+    </div>
+  </div>
+
+  <section class="features" id="features">
+    <div class="feature">
+      <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Verified">
+      <h3>Verified Suppliers</h3>
+      <p>All suppliers are pre-checked and trusted by local vendors.</p>
+    </div>
+    <div class="feature">
+      <img src="https://cdn-icons-png.flaticon.com/512/3014/3014071.png" alt="Group Order">
+      <h3>Group Orders</h3>
+      <p>Vendors in the same area team up to order in bulk for discounts.</p>
+    </div>
+    <div class="feature">
+      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Ratings">
+      <h3>Ratings & Reviews</h3>
+      <p>See what others say before making your first order.</p>
+    </div>
+    <div class="feature">
+      <img src="https://cdn-icons-png.flaticon.com/512/1250/1250615.png" alt="Compare">
+      <h3>Price Comparison</h3>
+      <p>Always get the best deal by comparing supplier prices instantly.</p>
+    </div>
+  </section>
+
+  <section class="contact" id="vendor">
+    <h2>Vendor Support</h2>
+    <p>Need supplies or help with finding materials? Reach out to our vendor team!</p>
+  </section>
+
+  <section class="contact" id="supplier">
+    <h2>Supplier Info</h2>
+    <p>Interested in becoming a trusted supplier? Partner with us today!</p>
+  </section>
+
+  <section class="contact" id="contact">
+    <h2>Contact a Vendor or Supplier</h2>
+    <p>Need help getting started? We’ll connect you with verified suppliers nearby!</p>
+    <p>Email us at: <strong>support@vendorconnect.in</strong></p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Street Vendor Supply Connect. Built with ❤️ for the Web Hackathon.</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzRAYtOvQg_7Za2d2FfqkFYpXKoGTyVWY",
+      authDomain: "streetvendorapp-376bb.firebaseapp.com",
+      databaseURL: "https://streetvendorapp-376bb-default-rtdb.firebaseio.com",
+      projectId: "streetvendorapp-376bb",
+      storageBucket: "streetvendorapp-376bb.appspot.com",
+      messagingSenderId: "347902837976",
+      appId: "1:347902837976:web:db66401b3471e276ccc3ad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const uid = user.uid;
+        get(ref(db, 'users/' + uid)).then((snapshot) => {
+          if (snapshot.exists()) {
+            const role = snapshot.val().role;
+            const navLinks = document.getElementById("navLinks");
+            if (role === 'supplier') {
+              navLinks.innerHTML += `<li><a href="upload.html">Upload</a></li><li><a href="dashboard.html">Dashboard</a></li>`;
+            } else if (role === 'vendor') {
+              navLinks.innerHTML += `<li><a href="products.html">Products</a></li><li><a href="vendordashboard.html">Vendor Dashboard</a></li>`;
+            }
+            navLinks.innerHTML += `<li><a href="#" onclick="logout()">Logout</a></li>`;
+          }
+        });
+      }
+    });
+
+    window.logout = function () {
+      auth.signOut().then(() => {
+        alert("Logged out!");
+        window.location.href = "login.html";
+      });
+    };
+  </script>
+
+</body>
+</html>

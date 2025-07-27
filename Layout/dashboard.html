@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Supplier/Admin Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #eef4f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .product-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100px;
+      padding: 4px;
+    }
+
+    button {
+      padding: 6px 12px;
+      margin: 2px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1e6fa7;
+    }
+
+    #logoutBtn {
+      background: crimson;
+    }
+
+    #logoutBtn:hover {
+      background: darkred;
+    }
+
+    .form-section, .filter-section, .chart-section {
+      margin-bottom: 20px;
+    }
+
+    canvas {
+      width: 100% !important;
+      max-height: 300px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📋 Supplier Dashboard</h1>
+    <p>Welcome! You can manage products, prices, and view analytics.</p>
+  </header>
+
+  <div class="container">
+
+    <!-- Add Product Form -->
+    <div class="form-section">
+      <h3>Add New Product</h3>
+      <input type="text" id="newProductName" placeholder="Product Name" />
+      <input type="text" id="newProductSupplier" placeholder="Supplier Name" />
+      <input type="number" id="newProductPrice" placeholder="Price" />
+      <button onclick="addProduct()">Add Product</button>
+    </div>
+
+    <!-- Filter by Category (Product Name) -->
+    <div class="filter-section">
+      <label for="productFilter">Filter Product:</label>
+      <input type="text" id="productFilter" placeholder="e.g. Tomato" />
+    </div>
+
+    <!-- Product List -->
+    <div id="product-list">Loading products...</div>
+
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+
+    <!-- Chart for Ratings -->
+    <div class="chart-section">
+      <h3>Top Rated Products</h3>
+      <canvas id="ratingChart"></canvas>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, get, set, update, remove, child } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzRAYtOvQg_7Za2d2FfqkFYpXKoGTyVWY",
+      authDomain: "streetvendorapp-376bb.firebaseapp.com",
+      databaseURL: "https://streetvendorapp-376bb-default-rtdb.firebaseio.com",
+      projectId: "streetvendorapp-376bb",
+      storageBucket: "streetvendorapp-376bb.appspot.com",
+      messagingSenderId: "347902837976",
+      appId: "1:347902837976:web:db66401b3471e276ccc3ad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    window.logout = function () {
+      signOut(auth).then(() => {
+        alert("Logged out!");
+        window.location.href = "login.html";
+      });
+    };
+
+    async function loadProducts() {
+      const snap = await get(ref(db, "prices"));
+      const products = snap.exists() ? snap.val() : {};
+      displayProducts(products);
+    }
+
+    function displayProducts(products) {
+      const list = document.getElementById("product-list");
+      list.innerHTML = "";
+
+      for (const product in products) {
+        const row = document.createElement("div");
+        row.className = "product-row";
+
+        let supplierInputs = "";
+        for (const supplier in products[product]) {
+          supplierInputs += `
+            <div>
+              ${supplier}: ₹<input type="number" value="${products[product][supplier]}"
+              onchange="updatePrice('${product}', '${supplier}', this.value)" />
+              <button onclick="deleteProduct('${product}', '${supplier}')">Delete</button>
+            </div>`;
+        }
+
+        row.innerHTML = `<div><strong>${product}</strong></div><div>${supplierInputs}</div>`;
+        list.appendChild(row);
+      }
+    }
+
+    window.updatePrice = function (product, supplier, newValue) {
+      const priceRef = ref(db, `prices/${product}/${supplier}`);
+      set(priceRef, parseFloat(newValue));
+    };
+
+    window.deleteProduct = function (product, supplier) {
+      const priceRef = ref(db, `prices/${product}/${supplier}`);
+      remove(priceRef).then(() => loadProducts());
+    };
+
+    window.addProduct = function () {
+      const name = document.getElementById("newProductName").value;
+      const supplier = document.getElementById("newProductSupplier").value;
+      const price = parseFloat(document.getElementById("newProductPrice").value);
+      if (name && supplier && !isNaN(price)) {
+        set(ref(db, `prices/${name}/${supplier}`), price).then(() => loadProducts());
+      } else {
+        alert("Please fill all fields correctly.");
+      }
+    };
+
+    document.getElementById("productFilter").addEventListener("input", async (e) => {
+      const value = e.target.value.toLowerCase();
+      const snap = await get(ref(db, "prices"));
+      const all = snap.exists() ? snap.val() : {};
+      const filtered = {};
+      for (const product in all) {
+        if (product.toLowerCase().includes(value)) {
+          filtered[product] = all[product];
+        }
+      }
+      displayProducts(filtered);
+    });
+
+    async function loadChart() {
+      const snap = await get(ref(db, "ratings"));
+      if (!snap.exists()) return;
+      const data = snap.val();
+      const counts = {};
+
+      for (const user in data) {
+        const rating = data[user].rating;
+        const comment = data[user].comment || "";
+        const product = comment.split(" ")[0];
+        if (!counts[product]) counts[product] = 0;
+        counts[product] += rating;
+      }
+
+      const ctx = document.getElementById("ratingChart").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: Object.keys(counts),
+          datasets: [{
+            label: "Total Ratings",
+            data: Object.values(counts),
+            backgroundColor: "#3498db"
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    loadProducts();
+    loadChart();
+  </script>
+</body>
+</html>

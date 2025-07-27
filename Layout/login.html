@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - VendorConnect</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff3e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #ff6f61;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      background-color: #ff6f61;
+      color: white;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e65c50;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .register-link a {
+      color: #ff6f61;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="login()">Login</button>
+    <div id="errorMsg" class="error"></div>
+    <div class="register-link">
+      Don't have an account? <a href="register.html">Register</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzRAYtOvQg_7Za2d2FfqkFYpXKoGTyVWY",
+      authDomain: "streetvendorapp-376bb.firebaseapp.com",
+      databaseURL: "https://streetvendorapp-376bb-default-rtdb.firebaseio.com",
+      projectId: "streetvendorapp-376bb",
+      storageBucket: "streetvendorapp-376bb.appspot.com",
+      messagingSenderId: "347902837976",
+      appId: "1:347902837976:web:db66401b3471e276ccc3ad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    window.login = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const errorMsg = document.getElementById("errorMsg");
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userId = userCredential.user.uid;
+
+        // Fetch role from Realtime Database
+        const snapshot = await get(ref(db, 'users/' + userId));
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const role = userData.role;
+
+          alert("✅ Login successful as " + role);
+
+          // Redirect based on role
+          if (role === "vendor") {
+            window.location.href = "vendordashboard.html";
+          } else if (role === "supplier") {
+            window.location.href = "dashboard.html";
+          } else {
+            alert("Unknown role");
+          }
+        } else {
+          errorMsg.innerText = "⚠️ User data not found!";
+        }
+
+      } catch (error) {
+        console.error("Login error:", error);
+        errorMsg.innerText = "❌ Login failed! " + error.message;
+      }
+    };
+  </script>
+</body>
+</html>

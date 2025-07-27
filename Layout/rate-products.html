@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Ratings</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f8fb;
+      padding: 30px;
+      color: #333;
+    }
+    h2 {
+      color: #1e90ff;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      max-width: 400px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 10px;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+    #top-rated-list {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+    }
+    li {
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>⭐ Rate a Product</h2>
+  <form id="rating-form">
+    <label>
+      Product Name:
+      <input type="text" id="rate-product" required />
+    </label>
+    <label>
+      Rating (1-5):
+      <input type="number" id="rate-score" min="1" max="5" required />
+    </label>
+    <label>
+      Comment:
+      <input type="text" id="rate-comment" />
+    </label>
+    <button type="submit">Submit Rating</button>
+  </form>
+
+  <h2>🏆 Top-Rated Products</h2>
+  <ul id="top-rated-list"><li>Loading...</li></ul>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      get,
+      set,
+      push,
+      child
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    // 🧩 Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzRAYtOvQg_7Za2d2FfqkFYpXKoGTyVWY",
+      authDomain: "streetvendorapp-376bb.firebaseapp.com",
+      databaseURL: "https://streetvendorapp-376bb-default-rtdb.firebaseio.com",
+      projectId: "streetvendorapp-376bb",
+      storageBucket: "streetvendorapp-376bb.appspot.com",
+      messagingSenderId: "347902837976",
+      appId: "1:347902837976:web:db66401b3471e276ccc3ad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
+
+    // 📥 Submit Rating
+    document.getElementById("rating-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const product = document.getElementById("rate-product").value.trim();
+      const rating = parseInt(document.getElementById("rate-score").value);
+      const comment = document.getElementById("rate-comment").value.trim();
+
+      if (!product || rating < 1 || rating > 5) {
+        alert("Please enter valid product name and rating (1-5).");
+        return;
+      }
+
+      const newRef = push(ref(db, `ratings/${product}`));
+      await set(newRef, {
+        rating,
+        comment
+      });
+
+      alert("✅ Rating submitted!");
+      this.reset();
+      loadTopRatedProducts(); // reload updated list
+    });
+
+    // 📊 Load Top-Rated Products
+    async function loadTopRatedProducts() {
+      const ratingsSnap = await get(ref(db, "ratings"));
+      const ratingsData = ratingsSnap.val();
+      const list = document.getElementById("top-rated-list");
+      list.innerHTML = "";
+
+      if (!ratingsData) {
+        list.innerHTML = "<li>No ratings yet</li>";
+        return;
+      }
+
+      const averages = [];
+
+      for (const product in ratingsData) {
+        const entries = Object.values(ratingsData[product]);
+        const total = entries.reduce((sum, r) => sum + r.rating, 0);
+        const avg = total / entries.length;
+        averages.push({ product, avg: avg.toFixed(2), count: entries.length });
+      }
+
+      averages.sort((a, b) => b.avg - a.avg);
+
+      for (const item of averages) {
+        const li = document.createElement("li");
+        li.innerHTML = `⭐ <strong>${item.product}</strong>: ${"⭐".repeat(Math.round(item.avg))} (${item.avg}/5 from ${item.count} rating${item.count > 1 ? "s" : ""})`;
+        list.appendChild(li);
+      }
+    }
+
+    loadTopRatedProducts();
+  </script>
+</body>
+</html>

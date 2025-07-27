@@ -1,0 +1,139 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #fff8f2;
+  color: #333;
+}
+
+header {
+  position: relative;
+  background: linear-gradient(135deg, #ff6f61, #ffb347);
+  color: white;
+  text-align: center;
+  padding: 40px 20px 60px;
+  overflow: hidden;
+}
+
+/* Animated steam */
+.steam-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('https://i.ibb.co/wKq2kHM/steam.gif') repeat;
+  opacity: 0.1;
+  background-size: cover;
+  pointer-events: none;
+  animation: steamMove 10s linear infinite;
+  z-index: 0;
+}
+
+@keyframes steamMove {
+  from { background-position: 0 0; }
+  to { background-position: 0 -100px; }
+}
+
+.header-overlay {
+  position: relative;
+  z-index: 1;
+}
+
+.header-overlay h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header-overlay .icon {
+  width: 35px;
+  height: 35px;
+}
+
+.subtext {
+  font-size: 1rem;
+  margin-top: 5px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.subtext span {
+  margin: 0 6px;
+  position: relative;
+}
+
+.subtext span::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+/* CTA Button */
+.cta-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  color: #ff6f61;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 30px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.cta-btn:hover {
+  background-color: #ffeadb;
+  color: #ff5722;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .header-overlay h1 {
+    font-size: 1.3rem;
+    flex-direction: column;
+  }
+
+  .subtext {
+    font-size: 0.9rem;
+  }
+
+  .cta-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+
+
+.slider {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 400px;
+}
+
+.slides {
+  display: flex;
+  width: 300%;
+  height: 100%;
+  transition: transform 1s ease-in-out;
+}
+
+.slides img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}

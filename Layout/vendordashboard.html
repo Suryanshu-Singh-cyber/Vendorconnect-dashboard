@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vendor Dashboard</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f2f8f9; padding:20px; }
+    h1 { color: #1e90ff; }
+    .card { background:#fff; padding:20px; margin-top:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    .product-row { margin-bottom:15px; }
+    .product-name { font-weight:bold; color:#333; }
+    .rating { color: goldenrod; margin-left:10px; }
+    input[type="text"], input[type="number"] { padding:6px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px; width:200px; }
+    button { margin-top:10px; padding:8px 16px; background-color: crimson; color:white; border:none; border-radius:6px; cursor:pointer; }
+    button:hover { background-color: darkred; }
+    .whatsapp-button { margin-top:20px; display:inline-block; padding:10px 20px; background-color:#25D366; color:white; border-radius:5px; text-decoration:none; font-weight:bold; }
+    #order-list { list-style:none; padding:0; }
+    #order-list li { padding:8px; border-bottom:1px solid #eee; }
+    #suggested-price { font-weight:bold; margin-top:10px; color:#2e7d32; }
+  </style>
+</head>
+<body>
+  <h1>📦 Vendor Dashboard</h1>
+  <p>Welcome vendor! Manage prices, view ratings, and contact suppliers.</p>
+
+  <div class="card">
+    <h2>📍 Filter by Location</h2>
+    <input type="text" id="locationFilter" placeholder="Enter location (e.g., Delhi)" oninput="loadAll()">
+  </div>
+
+  <div class="card" id="price-comparison">
+    <h2>📊 Price Comparison & Edit</h2>
+    <p>Loading prices...</p>
+  </div>
+
+  <div class="card" id="ratings-section">
+    <h2>🌟 Customer Ratings</h2>
+    <p>Loading ratings...</p>
+  </div>
+
+  <div class="card">
+    <h2>💬 Contact Supplier via WhatsApp</h2>
+    <a class="whatsapp-button" href="https://wa.me/919876543210?text=Hello,%20I%20am%20interested%20in%20your%20products" target="_blank">Chat Now</a>
+  </div>
+
+  <div class="card">
+    <h2>⭐ Rate a Product</h2>
+    <form id="rating-form">
+      <label>Product Name: <input type="text" id="rate-product" required /></label><br>
+      <label>Rating (1‑5): <input type="number" id="rate-score" min="1" max="5" required /></label><br>
+      <label>Comment: <input type="text" id="rate-comment" /></label><br>
+      <label>Your Location: <input type="text" id="rate-location" required /></label><br>
+      <button type="submit">Submit Rating</button>
+    </form>
+  </div>
+
+  <div class="card" id="top-rated">
+    <h2>🏆 Top Rated Products</h2>
+    <p>Loading top-rated products...</p>
+  </div>
+
+  <div class="card">
+    <h2>🧾 Order Management</h2>
+    <form id="order-form">
+      <label>Product: <input type="text" id="order-product" required /></label><br>
+      <label>Quantity: <input type="number" id="order-qty" required /></label><br>
+      <label>Supplier: <input type="text" id="order-supplier" required /></label><br>
+      <button type="submit">Place Order</button>
+    </form>
+    <h3>📋 Your Orders</h3>
+    <ul id="order-list"></ul>
+  </div>
+
+  <div class="card">
+    <h2>💡 Smart Price Suggestion</h2>
+    <form id="suggestion-form">
+      <label>Product Name: <input type="text" id="suggest-product" required /></label>
+      <button type="submit">Get Suggested Price</button>
+    </form>
+    <p id="suggested-price"></p>
+  </div>
+
+  <button onclick="logout()">Logout</button>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getDatabase, ref, get, set, update, push, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  window.logout = () => signOut(auth).then(() => {
+    alert("Logged out!"); window.location = "login.html";
+  });
+
+  const locInput = document.getElementById("locationFilter");
+
+  async function loadPrices(){
+    const snap = await get(ref(db, "prices")); const prices = snap.exists()?snap.val():{};
+    const c = document.getElementById("price-comparison"); c.innerHTML = "<h2>📊 Price Comparison & Edit</h2>";
+    if(!Object.keys(prices).length){ c.innerHTML+="<p>No price data.</p>"; return; }
+    for(const p in prices){
+      const row = document.createElement("div"); row.className="product-row"; row.innerHTML=`<span class="product-name">${p}:</span><br>`;
+      for(const sup in prices[p]){
+        const crt = prices[p][sup], id=`in-${p}-${sup}`;
+        row.innerHTML += `<label>${sup}: ₹</label><input type="number" id="${id}" value="${crt}" style="width:80px;"><button onclick="updatePrice('${p}','${sup}','${id}')">Update</button><br>`;
+      }
+      c.appendChild(row);
+    }
+  }
+  window.updatePrice = async (prod,sup,id)=>{
+    const nv = document.getElementById(id).value;
+    if(!nv){ alert("Cannot blank"); return; }
+    await set(ref(db, `prices/${prod}/${sup}`), parseFloat(nv));
+    alert(`Updated ${prod} price for ${sup} to ₹${nv}`);
+  };
+
+  async function loadRatings(){
+    const snap = await get(ref(db,"ratings")); const rs= snap.exists()?snap.val():{};
+    const c=document.getElementById("ratings-section"); c.innerHTML="<h2>🌟 Customer Ratings</h2>";
+    const fl = locInput.value.toLowerCase();
+    for(const id in rs){
+      const {product, rating, comment, location} = rs[id];
+      if(fl && (!location || !location.toLowerCase().includes(fl))) continue;
+      const stars="⭐".repeat(rating);
+      const div=document.createElement("div"); div.className="product-row";
+      div.innerHTML=`<b>${product} (${location||"Unknown"}):</b> ${comment} <span class="rating">${stars}</span>`;
+      c.appendChild(div);
+    }
+    if(!c.querySelector(".product-row")) c.innerHTML+= "<p>No ratings for this location.</p>";
+  }
+
+  document.getElementById("rating-form").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const product = document.getElementById("rate-product").value.trim();
+    const rating = parseInt(document.getElementById("rate-score").value);
+    const comment = document.getElementById("rate-comment").value.trim();
+    const location = document.getElementById("rate-location").value.trim();
+    if(!product||rating<1||rating>5||!location){ alert("Fill all"); return; }
+    const cust = `cust_${Date.now()}`;
+    await set(ref(db, `ratings/${cust}`), { product, rating, comment, location });
+    alert("Thanks!"); document.getElementById("rating-form").reset();
+    loadRatings(); loadTopRated();
+  });
+
+  async function loadTopRated(){
+    const snap = await get(ref(db,"ratings")); const rs = snap.exists()?snap.val():{};
+    const tot={}, cnt={};
+    for(const k in rs){
+      const {product, rating} = rs[k];
+      if(!product) continue;
+      tot[product] = (tot[product]||0) + rating;
+      cnt[product] = (cnt[product]||0) + 1;
+    }
+    const arr = Object.keys(tot).map(p=>({product:p, avg:(tot[p]/cnt[p]).toFixed(2)}))
+      .sort((a,b)=>b.avg - a.avg);
+    const c = document.getElementById("top-rated"); c.innerHTML="<h2>🏆 Top Rated Products</h2>";
+    if(!arr.length){ c.innerHTML+="<p>No ratings yet.</p>"; return; }
+    arr.forEach(it => {
+      const stars="⭐".repeat(Math.round(it.avg));
+      c.innerHTML+=`<div class="product-row"><b>${it.product}:</b> ${it.avg} ${stars}</div>`;
+    });
+  }
+
+  document.getElementById("order-form").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const p=document.getElementById("order-product").value;
+    const q=document.getElementById("order-qty").value;
+    const s=document.getElementById("order-supplier").value;
+    await push(ref(db,"orders"),{ product:p, qty:q, supplier:s, timestamp:Date.now() });
+    alert("Order Placed!"); document.getElementById("order-form").reset();
+  });
+
+  const orderList = document.getElementById("order-list");
+  onValue(ref(db,"orders"), snap => {
+    orderList.innerHTML="";
+    snap.forEach(c=> {
+      const d=c.val();
+      const li=document.createElement("li");
+      li.textContent = `${d.product} – ${d.qty} units from ${d.supplier}`;
+      orderList.appendChild(li);
+    });
+  });
+
+  document.getElementById("suggestion-form").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const prod = document.getElementById("suggest-product").value.trim();
+    const snap = await get(ref(db, `prices/${prod}`));
+    if(!snap.exists()){ document.getElementById("suggested-price").innerText="No data."; return; }
+    const arr = Object.values(snap.val()).map(Number);
+    const avg = (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2);
+    document.getElementById("suggested-price").innerText = `Suggested Price: ₹${avg}`;
+  });
+
+  window.loadAll = () => { loadPrices(); loadRatings(); loadTopRated(); };
+  loadAll();
+</script>
+</body>
+</html>
