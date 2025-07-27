@@ -4,6 +4,69 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    import {
+      getDatabase,
+      ref,
+      set
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzRAYtOvQg_7Za2d2FfqkFYpXKoGTyVWY",
+      authDomain: "streetvendorapp-376bb.firebaseapp.com",
+      projectId: "streetvendorapp-376bb",
+      storageBucket: "streetvendorapp-376bb.appspot.com",
+      messagingSenderId: "347902837976",
+      appId: "1:347902837976:web:db66401b3471e276ccc3ad",
+      measurementId: "G-CDVGK2WTLG",
+      databaseURL: "https://streetvendorapp-376bb-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Handle form submission
+    window.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("register-form");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const role = document.getElementById("role").value;
+
+        if (!role) {
+          alert("Please select a role.");
+          return;
+        }
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const uid = userCredential.user.uid;
+
+          await set(ref(db, 'users/' + uid), {
+            email: email,
+            role: role
+          });
+
+          alert("✅ Registered successfully as " + role + "!");
+          // Optionally redirect after registration
+          // window.location.href = "login.html";
+        } catch (error) {
+          console.error("Registration Error:", error);
+          alert("❌ " + error.message);
+        }
+      });
+    });
+  </script>
   <style>
     * {
       box-sizing: border-box;
